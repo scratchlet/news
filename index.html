@@ -28,13 +28,14 @@
       overflow-x: hidden;
     }
 
+    /* Webkit Engine Scrollbar Styles (Chrome, Safari, Edge) applied globally and to the container */
     ::-webkit-scrollbar {
       width: 12px;
       height: 12px;
     }
     ::-webkit-scrollbar-track {
       background: #8f3200;
-      border-left: 2px solid rgba(255, 255, 255, 0.1);
+      border-radius: 10px;
     }
     ::-webkit-scrollbar-thumb {
       background: #fff4d6;
@@ -46,6 +47,7 @@
       background: #ffc76a;
     }
 
+    /* Gecko Engine Scrollbar Styles (Firefox) */
     * {
       scrollbar-width: thin;
       scrollbar-color: #fff4d6 #8f3200;
@@ -179,7 +181,7 @@
     }
 
     /* ==========================================================================
-       5. MAIN CONTAINER AND CARD SYSTEMS
+       5. MAIN CONTAINER AND UNIFIED SCROLLING CARD SYSTEM
        ========================================================================== */
     .container {
       max-width: 1000px;
@@ -187,22 +189,52 @@
       padding: 25px;
     }
 
-    .card {
+    /* The Main Outer Card Container */
+    .big-news-card {
       background: #ff8c1a;
-      border-radius: 16px;
-      padding: 25px;
-      margin-bottom: 25px;
+      border-radius: 20px;
+      padding: 25px 15px 25px 25px; /* Extra padding adjustments on right side for the scrollbar layout gap */
       box-shadow: inset 0 -8px rgba(0, 0, 0, .18), 0 10px 25px rgba(0, 0, 0, .2);
     }
 
+    .big-news-card h1 {
+      font-family: "Titan One", cursive;
+      font-size: 2.2rem;
+      margin-bottom: 20px;
+      text-shadow: 0 3px 6px rgba(0,0,0,0.15);
+      display: flex;
+      align-items: center;
+      gap: 12px;
+    }
+
+    /* Internal scrolling element holding all inner content entries */
+    .news-scroll-box {
+      max-height: 65vh; /* Standardized visible boundaries across different screens */
+      overflow-y: auto;
+      padding-right: 15px; /* Buffer space for scroll tracks */
+    }
+
+    /* Inner nested post blocks */
+    .inner-news-post {
+      background: rgba(0, 0, 0, 0.12);
+      border-radius: 14px;
+      padding: 20px;
+      margin-bottom: 20px;
+      border: 2px dashed rgba(255, 255, 255, 0.15);
+    }
+
+    .inner-news-post:last-child {
+      margin-bottom: 0; /* Prevents overflow bottom gap spacing errors */
+    }
+
     /* ==========================================================================
-       6. DYNAMIC NEWS CORE ENGINE DESIGN
+       6. DYNAMIC NEWS TEXT ELEMENTS DESIGN
        ========================================================================== */
     .news-header {
       display: flex;
       justify-content: space-between;
       align-items: flex-start;
-      border-bottom: 2px dashed rgba(255, 255, 255, 0.2);
+      border-bottom: 2px dashed rgba(255, 255, 255, 0.15);
       padding-bottom: 12px;
       margin-bottom: 15px;
       flex-wrap: wrap;
@@ -211,7 +243,7 @@
 
     .news-title-group h2 {
       font-family: "Titan One", cursive;
-      font-size: 1.8rem;
+      font-size: 1.6rem;
       text-shadow: 0 2px 4px rgba(0,0,0,0.15);
     }
 
@@ -241,10 +273,10 @@
 
     .news-image {
       width: 100%;
-      max-height: 450px;
+      max-height: 400px;
       object-fit: cover;
       border-radius: 12px;
-      border: 3px solid rgba(255, 255, 255, 0.3);
+      border: 3px solid rgba(255, 255, 255, 0.2);
       margin-top: 20px;
       box-shadow: 0 6px 15px rgba(0,0,0,0.15);
     }
@@ -269,7 +301,13 @@
     </div>
   </nav>
 
-  <div class="container" id="newsFeed"></div>
+  <div class="container">
+    <div class="big-news-card">
+      <h1><span class="material-icons" style="font-size: 2.5rem;">feed</span> Latest News</h1>
+      
+      <div class="news-scroll-box" id="newsFeed"></div>
+    </div>
+  </div>
 
   <script type="module">
     import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.5/firebase-app.js";
@@ -314,12 +352,12 @@
     const logoutActionButton = document.getElementById("logoutBtn");
 
     /**
-     * Renders news items directly from the array database configuration
+     * Renders clean layout panels inside the central scroll wrapper
      */
     function renderNews() {
       newsFeedContainer.innerHTML = newsDatabase.map(news => {
         return `
-          <div class="card" id="post-${news.id}">
+          <div class="inner-news-post" id="post-${news.id}">
             <div class="news-header">
               <div class="news-title-group">
                 <h2>${news.title}</h2>
